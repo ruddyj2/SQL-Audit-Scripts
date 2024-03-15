@@ -169,7 +169,7 @@ This will list what permission the guest user has.
     FROM #guest_perms
     DROP TABLE #guest_perms
 
-Guest user by default has CONNECT permissions to the master, msdb and tempdb databases. Any other permissions will be returned by this query as potential problem. Refer to this [tip](/sqlservertip/1172/sql-server-database-guest-user-account/) for more information about guest user account.
+Guest user by default has CONNECT permissions to the master, msdb and tempdb databases. Any other permissions will be returned by this query as potential problem.
 
 ### SQL Server Authentication mode
 
@@ -177,7 +177,6 @@ If this returns 0 the server uses both Windows and SQL Server security.  If the 
 
     SELECT SERVERPROPERTY ('IsIntegratedSecurityOnly')
 
-Check this [tip](/sqlservertip/2191/how-to-check-sql-server-authentication-mode-using-t-sql-and-ssms/) for different ways to check the SQL Server Authentication mode.
 
 ### SQL Server version
 
@@ -187,7 +186,6 @@ There are many different ways to find the SQL Server version. Here are some of t
 
 .
 
-
     SELECT SERVERPROPERTY('ProductVersion') AS ProductVersion,
      SERVERPROPERTY('ProductLevel') AS ProductLevel
 
@@ -195,7 +193,6 @@ The 'ProductLevel' property above will show Service Pack level as well (if it ha
 
     EXEC master.sys.xp_msver
 
-Check this [tip](/sqlservertip/1140/how-to-tell-what-sql-server-version-you-are-running/) for other ways to check the SQL Server version.
 
 ### Database users, permissions and application roles
 
@@ -210,7 +207,6 @@ This will give a list of permissions for each user.
     -- list of the database application roles
     SELECT name FROM sys.database_principals WHERE type = 'A'
 
-Refer to [this tip](/sqlservertip/1071/auditing-your-sql-server-database-and-server-permissions/) for more information about permissions auditing.
 
 ### Location of Data and Log files
 
@@ -246,11 +242,8 @@ The query below will show if the Named Pipes protocol is enabled on SQL Server i
 
     SELECT @NamedPipesEnabled AS NamedPipesEnabled
 
-Refer to [this tip](/sqlservertip/2320/understanding-sql-server-net-libraries/) for more information about network protocols used by SQL Server.
 
 ### SQL Server Services Startup mode
-
-The easiest way which will allow you as well to incorporate this check to your SQL scripts is to do this as described in [tip](/sqlservertip/2611/sql-services-status-check--an-evolution-part-3/):
 
     SELECT * FROM sys.dm_server_services
 
@@ -318,7 +311,7 @@ The last login in the list above still has user account in master database, but 
 
 ### Find broken database users on all databases (SQL logins mapping is broken)
 
-These users are known as orphaned users because the associated link between the login and user is broken. Refer this [tip](/sqlservertip/1590/understanding-and-dealing-with-orphaned-users-in-a-sql-server-database/) for more information and how to fix these.
+These users are known as orphaned users because the associated link between the login and user is broken. 
 
     EXEC master.sys.sp_msforeachdb '
     print ''?''
