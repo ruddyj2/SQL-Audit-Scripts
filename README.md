@@ -10,7 +10,7 @@ The scripts listed below will help you configure several of the security options
 This will check to see what your current login audit level is set to capture.
 
        DECLARE @AuditLevel int
-       EXEC master.dbo.xp\_instance\_regread N'HKEY\_LOCAL\_MACHINE', 
+       EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE', 
           N'Software\\Microsoft\\MSSQLServer\\MSSQLServer', 
           N'AuditLevel', @AuditLevel OUTPUT
        SELECT CASE WHEN @AuditLevel = 0 THEN 'None'
@@ -23,9 +23,9 @@ This will check to see what your current login audit level is set to capture.
 
 This script will change the setting so that you stored 48 SQL Server error log archives.  This will allow us to have a good amount of history from our error logs.
 
-    EXEC master.dbo.xp\_instance\_regwrite N'HKEY\_LOCAL\_MACHINE', 
+    EXEC master.dbo.xp_instance_regwrite N'HKEY_LOCAL_MACHINE', 
            N'Software\\Microsoft\\MSSQLServer\\MSSQLServer', 
-           N'NumErrorLogs', REG\_DWORD, 48
+           N'NumErrorLogs', REG_DWORD, 48
 
 Read this [tip](/sqlservertip/1835/increase-the-number-of-sql-server-error-logs/) if you want to configure the number error log files using SQL Server Management Studio (SSMS). Refer to [tip](/sqlservertip/1155/sql-server-2005-error-log-management/) for more information about log files management and configuration.
 
@@ -35,20 +35,20 @@ We will setup these components so when there is an issue we can be alerted by SQ
 
 Create operator:
 
-    EXEC msdb.dbo.sp\_add\_operator @name=N'NotifyDBA\_Group', 
+    EXEC msdb.dbo.sp_add_operator @name=N'NotifyDBA_Group', 
       @enabled=1, 
-      @email\_address=N'NotifyDBAs@company.com'
+      @email_address=N'NotifyDBAs@company.com'
 
 Create alert for severity 14 events (these are security related errors):
 
-    EXEC msdb.dbo.sp\_add\_alert @name = N'Sev. 14 Errors - Permissions', 
+    EXEC msdb.dbo.sp_add_alert @name = N'Sev. 14 Errors - Permissions', 
       @severity = 14, 
-      @include\_event\_description\_in = 1
+      @include_event_description_in = 1
 
 Create notification:
 
-    EXEC msdb.dbo.sp\_add\_notification @alert\_name = N'Sev. 14 Errors - Permissions', 
-    @operator\_name = N'NotifyDBA\_Group', @notification\_method = 1
+    EXEC msdb.dbo.sp_add_notification @alert_name = N'Sev. 14 Errors - Permissions', 
+    @operator_name = N'NotifyDBA_Group', @notification_method = 1
 
 Use this [tip](/sqlservertip/1523/how-to-setup-sql-server-alerts-and-email-operator-notifications) if you prefer to configure alerts and operators using SSMS.
 
@@ -56,18 +56,18 @@ Use this [tip](/sqlservertip/1523/how-to-setup-sql-server-alerts-and-email-opera
 
 This will allow us to search the SQL Server error log for failed logins.  This command below will search the active SQL Server error log.
 
-EXEC master.dbo.xp\_readerrorlog 0, 1, 'login failed', null, NULL, NULL, N'desc'
+EXEC master.dbo.xp_readerrorlog 0, 1, 'login failed', null, NULL, NULL, N'desc'
 
-Refer to this [tip](/sqlservertip/1476/reading-the-sql-server-log-files-using-tsql/) if you want to learn more about xp\_readerrorlog extended stored procedure and it's usage as well as how to read the archived SQL Server error logs.
+Refer to this [tip](/sqlservertip/1476/reading-the-sql-server-log-files-using-tsql/) if you want to learn more about xp_readerrorlog extended stored procedure and it's usage as well as how to read the archived SQL Server error logs.
 
 ### Check that Builtin\\Administrators group removed from sysadmins role
 
 This command will check to see if the builtin administrator account has been removed.
 
 SELECT r.name  as SrvRole, u.name  as LoginName  
-FROM sys.server\_role\_members m JOIN
-  sys.server\_principals r ON m.role\_principal\_id = r.principal\_id  JOIN
-  sys.server\_principals u ON m.member\_principal\_id = u.principal\_id 
+FROM sys.server_role_members m JOIN
+  sys.server_principals r ON m.role_principal_id = r.principal_id  JOIN
+  sys.server_principals u ON m.member_principal_id = u.principal_id 
 WHERE u.name = 'BUILTIN\\Administrators'
 
 Make sure you have read this [tip](/sqlservertip/1017/security-issues-with-the-sql-server-builtin-administrators-group/) before you remove BUILTIN\\Administrators login from SQL Server.
@@ -78,38 +78,38 @@ If for some reason you want to keep the BUILTIN\\Administrators login you need t
 
 Note, that you will get results from the extended procedure below only if the BUILTIN\\Administrators group exists as login on SQL Server.
 
-EXEC master.sys.xp\_logininfo 'BUILTIN\\Administrators','members'
+EXEC master.sys.xp_logininfo 'BUILTIN\\Administrators','members'
 
 ### Find Sysadmins server role's members (and other server level roles)
 
 This will show all logins and what server level roles each login has been assigned.
 
-EXEC master.sys.sp\_helpsrvrolemember
+EXEC master.sys.sp_helpsrvrolemember
 
 Refer to this [tip](/sqlservertip/2809/auditing-sql-server-2012-server-roles/) for information about Server Roles Auditing using system views (including SQL Server 2012 user-defined server roles).
 
-### Find db\_owner database role's members in each database
+### Find db_owner database role's members in each database
 
 This will give you a list of database owners for each database.
 
-    EXEC master.sys.sp\_MSforeachdb '
+    EXEC master.sys.sp_MSforeachdb '
     PRINT ''?''
-    EXEC \[?\].dbo.sp\_helprolemember ''db\_owner'''
+    EXEC \[?\].dbo.sp_helprolemember ''db_owner'''
 
 ### Find logins mapped to the "dbo" user in each database
 
 This will find all users that are mapped to the dbo schema.
 
-    EXEC master.sys.sp\_MSforeachdb '
+    EXEC master.sys.sp_MSforeachdb '
     PRINT ''?''
-    EXEC \[?\].dbo.sp\_helpuser ''dbo'''
+    EXEC \[?\].dbo.sp_helpuser ''dbo'''
 
 ### Check password policies and expiration for the SQL logins
 
 This will check whether the password policy is turn on or off.
 
-    SELECT name  FROM sys.sql\_logins 
-     WHERE  is\_policy\_checked=0 OR is\_expiration\_checked = 0
+    SELECT name  FROM sys.sql_logins 
+     WHERE  is_policy_checked=0 OR is_expiration_checked = 0
 
 Refer to this [tip](/sqlservertip/1088/sql-server-login-properties-to-enforce-password-policies-and-expiration/) for more information about the "Enforce password policy" and the "Enforce password expiration" properties of the SQL Server Logins. This is also covered in another tip [here](/sqlservertip/1909/how-to-configure-password-enforcement-options-for-standard-sql-server-logins/).
 
@@ -132,21 +132,21 @@ This will check to see if these sample databases are present on your server.
 This will check whether the sa password exists and if it does if the password policy is turned on for this login.
 
     SELECT l.name, CASE WHEN l.name = 'sa' THEN 'NO' ELSE 'YES' END as Renamed,
-      s.is\_policy\_checked, s.is\_expiration\_checked, l.is\_disabled
-    FROM sys.server\_principals AS l
-     LEFT OUTER JOIN sys.sql\_logins AS s ON s.principal\_id = l.principal\_id
+      s.is_policy_checked, s.is_expiration_checked, l.is_disabled
+    FROM sys.server_principals AS l
+     LEFT OUTER JOIN sys.sql_logins AS s ON s.principal_id = l.principal_id
     WHERE l.sid = 0x01
 
 Refer to this [tip](/sqlservertip/1154/password-management-options-for-the-sql-server-sa-login/) for the options to make "sa" login secure.
 
 ### Check server configuration options
 
-This will check different server configuration settings such as: allow updates, cross db ownership chaining, clr enabled, SQL Mail XPs, Database Mail XPs, xp\_cmdshell and Ad Hoc Distributed Queries.
+This will check different server configuration settings such as: allow updates, cross db ownership chaining, clr enabled, SQL Mail XPs, Database Mail XPs, xp_cmdshell and Ad Hoc Distributed Queries.
 
-    SELECT name, value\_in\_use FROM sys.configurations
-     WHERE configuration\_id IN (16391, 102, 400, 1562, 16386, 16385, 16390, 16393)
+    SELECT name, value_in_use FROM sys.configurations
+     WHERE configuration_id IN (16391, 102, 400, 1562, 16386, 16385, 16390, 16393)
 
-Configuration\_id 16393 is to check if "Contained Databases Authentication" option is enabled on SQL Server 2012. There are some potential security threats associated with contained databases that DBAs have to understand. Read more here: [Security Best Practices with Contained Databases](http://msdn.microsoft.com/en-us/library/ff929055.aspx).
+Configuration_id 16393 is to check if "Contained Databases Authentication" option is enabled on SQL Server 2012. There are some potential security threats associated with contained databases that DBAs have to understand. Read more here: [Security Best Practices with Contained Databases](http://msdn.microsoft.com/en-us/library/ff929055.aspx).
 
 Refer also to this [tip](/sqlservertip/1782/understanding-cross-database-ownership-chaining-in-sql-server/) to understand better the Cross Database Ownership Chaining feature.
 
@@ -155,23 +155,23 @@ Refer also to this [tip](/sqlservertip/1782/understanding-cross-database-ownersh
 This will list what permission the guest user has.
 
     SET NOCOUNT ON
-    CREATE TABLE #guest\_perms 
-     ( db SYSNAME, class\_desc SYSNAME, 
-      permission\_name SYSNAME, ObjectName SYSNAME NULL)
-    EXEC master.sys.sp\_MSforeachdb
-    'INSERT INTO #guest\_perms
-     SELECT ''?'' as DBName, p.class\_desc, p.permission\_name, 
-       OBJECT\_NAME (major\_id, DB\_ID(''?'')) as ObjectName
-     FROM \[?\].sys.database\_permissions p JOIN \[?\].sys.database\_principals l
-      ON p.grantee\_principal\_id= l.principal\_id 
+    CREATE TABLE #guest_perms 
+     ( db SYSNAME, class_desc SYSNAME, 
+      permission_name SYSNAME, ObjectName SYSNAME NULL)
+    EXEC master.sys.sp_MSforeachdb
+    'INSERT INTO #guest_perms
+     SELECT ''?'' as DBName, p.class_desc, p.permission_name, 
+       OBJECT_NAME (major_id, DB_ID(''?'')) as ObjectName
+     FROM \[?\].sys.database_permissions p JOIN \[?\].sys.database_principals l
+      ON p.grantee_principal_id= l.principal_id 
      WHERE l.name = ''guest'' AND p.\[state\] = ''G'''
 
-    SELECT db AS DatabaseName, class\_desc, permission\_name, 
-     CASE WHEN class\_desc = 'DATABASE' THEN db ELSE ObjectName END as ObjectName, 
-     CASE WHEN DB\_ID(db) IN (1, 2, 4) AND permission\_name = 'CONNECT' THEN 'Default' 
+    SELECT db AS DatabaseName, class_desc, permission_name, 
+     CASE WHEN class_desc = 'DATABASE' THEN db ELSE ObjectName END as ObjectName, 
+     CASE WHEN DB_ID(db) IN (1, 2, 4) AND permission_name = 'CONNECT' THEN 'Default' 
       ELSE 'Potential Problem!' END as CheckStatus
-    FROM #guest\_perms
-    DROP TABLE #guest\_perms
+    FROM #guest_perms
+    DROP TABLE #guest_perms
 
 Guest user by default has CONNECT permissions to the master, msdb and tempdb databases. Any other permissions will be returned by this query as potential problem. Refer to this [tip](/sqlservertip/1172/sql-server-database-guest-user-account/) for more information about guest user account.
 
@@ -221,29 +221,29 @@ Refer to [this tip](/sqlservertip/1071/auditing-your-sql-server-database-and-ser
 Quickly find databases that use only one drive:
 
     SET NOCOUNT ON
-    CREATE TABLE #db\_drives (db SYSNAME, drive\_count INT)
-    EXEC master.sys.sp\_MSforeachdb
-    'INSERT INTO #db\_drives
+    CREATE TABLE #db_drives (db SYSNAME, drive_count INT)
+    EXEC master.sys.sp_MSforeachdb
+    'INSERT INTO #db_drives
      SELECT ''?'' AS DBName, 
-      COUNT (DISTINCT LEFT(physical\_name, CHARINDEX( ''\\'', physical\_name,0)))
-     FROM \[?\].sys.database\_files'
+      COUNT (DISTINCT LEFT(physical_name, CHARINDEX( ''\\'', physical_name,0)))
+     FROM \[?\].sys.database_files'
       
     SELECT db AS DatabaseName
-     FROM #db\_drives 
-    WHERE drive\_count = 1 AND DB\_ID(db) > 4
-    DROP TABLE #db\_drives
+     FROM #db_drives 
+    WHERE drive_count = 1 AND DB_ID(db) > 4
+    DROP TABLE #db_drives
 
 Check data and log files drives for the current database ('DriveLetter' column in the query below):
 
-SELECT name, type\_desc, physical\_name, 
- LEFT(physical\_name, CHARINDEX( '\\', physical\_name,0)) AS DriveLetter
-FROM sys.database\_files
+SELECT name, type_desc, physical_name, 
+ LEFT(physical_name, CHARINDEX( '\\', physical_name,0)) AS DriveLetter
+FROM sys.database_files
 
 ### Check enabled Network Protocols
 
 The query below will show if the Named Pipes protocol is enabled on SQL Server instance:
 
-    EXEC master.dbo.xp\_instance\_regread N'HKEY\_LOCAL\_MACHINE',
+    EXEC master.dbo.xp_instance_regread N'HKEY_LOCAL_MACHINE',
       N'Software\\Microsoft\\MSSQLServer\\MSSQLServer\\SuperSocketNetLib\\Np', 
       N'Enabled', 
       @NamedPipesEnabled OUTPUT
@@ -256,7 +256,7 @@ Refer to [this tip](/sqlservertip/2320/understanding-sql-server-net-libraries/) 
 
 The easiest way which will allow you as well to incorporate this check to your SQL scripts is to do this as described in [tip](/sqlservertip/2611/sql-services-status-check--an-evolution-part-3/):
 
-    SELECT \* FROM sys.dm\_server\_services
+    SELECT \* FROM sys.dm_server_services
 
 ### Linked Servers and Linked Server Logins
 
@@ -265,56 +265,56 @@ This will provide a list of linked server and the logins used for linked servers
     \-- list of remote/linked servers
     SELECT \* FROM sys.servers
     -- linked server logins
-    EXEC master.sys.sp\_helplinkedsrvlogin 
+    EXEC master.sys.sp_helplinkedsrvlogin 
 
 ### Find logins without permissions
 
 This will find a list of logins that no permissions granted.  These logins if are not used could then be removed.
 
     SET NOCOUNT ON
-    CREATE TABLE #all\_users (db VARCHAR(70), sid VARBINARY(85), stat VARCHAR(50))
-    EXEC master.sys.sp\_msforeachdb
-    'INSERT INTO #all\_users  
+    CREATE TABLE #all_users (db VARCHAR(70), sid VARBINARY(85), stat VARCHAR(50))
+    EXEC master.sys.sp_msforeachdb
+    'INSERT INTO #all_users  
      SELECT ''?'', CONVERT(varbinary(85), sid) , 
-      CASE WHEN  r.role\_principal\_id IS NULL AND p.major\_id IS NULL 
-      THEN ''no\_db\_permissions''  ELSE ''db\_user'' END
-     FROM \[?\].sys.database\_principals u LEFT JOIN \[?\].sys.database\_permissions p 
-       ON u.principal\_id = p.grantee\_principal\_id  
-       AND p.permission\_name <> ''CONNECT''
-      LEFT JOIN \[?\].sys.database\_role\_members r 
-       ON u.principal\_id = r.member\_principal\_id
-      WHERE u.SID IS NOT NULL AND u.type\_desc <> ''DATABASE\_ROLE'''
+      CASE WHEN  r.role_principal_id IS NULL AND p.major_id IS NULL 
+      THEN ''no_db_permissions''  ELSE ''db_user'' END
+     FROM \[?\].sys.database_principals u LEFT JOIN \[?\].sys.database_permissions p 
+       ON u.principal_id = p.grantee_principal_id  
+       AND p.permission_name <> ''CONNECT''
+      LEFT JOIN \[?\].sys.database_role_members r 
+       ON u.principal_id = r.member_principal_id
+      WHERE u.SID IS NOT NULL AND u.type_desc <> ''DATABASE_ROLE'''
     IF EXISTS 
-    (SELECT l.name FROM sys.server\_principals l LEFT JOIN sys.server\_permissions p 
-      ON l.principal\_id = p.grantee\_principal\_id  
-      AND p.permission\_name <> 'CONNECT SQL'
-     LEFT JOIN sys.server\_role\_members r 
-      ON l.principal\_id = r.member\_principal\_id
-     LEFT JOIN #all\_users u 
+    (SELECT l.name FROM sys.server_principals l LEFT JOIN sys.server_permissions p 
+      ON l.principal_id = p.grantee_principal_id  
+      AND p.permission_name <> 'CONNECT SQL'
+     LEFT JOIN sys.server_role_members r 
+      ON l.principal_id = r.member_principal_id
+     LEFT JOIN #all_users u 
       ON l.sid= u.sid
-     WHERE r.role\_principal\_id IS NULL  AND l.type\_desc <> 'SERVER\_ROLE' 
-      AND p.major\_id IS NULL
+     WHERE r.role_principal_id IS NULL  AND l.type_desc <> 'SERVER_ROLE' 
+      AND p.major_id IS NULL
      )
     BEGIN
-     SELECT DISTINCT l.name LoginName, l.type\_desc, l.is\_disabled, 
-      ISNULL(u.stat + ', but is user in ' + u.db  +' DB', 'no\_db\_users') db\_perms, 
-      CASE WHEN p.major\_id IS NULL AND r.role\_principal\_id IS NULL  
-      THEN 'no\_srv\_permissions' ELSE 'na' END srv\_perms 
-     FROM sys.server\_principals l LEFT JOIN sys.server\_permissions p 
-       ON l.principal\_id = p.grantee\_principal\_id  
-       AND p.permission\_name <> 'CONNECT SQL'
-      LEFT JOIN sys.server\_role\_members r 
-       ON l.principal\_id = r.member\_principal\_id
-       LEFT JOIN #all\_users u 
+     SELECT DISTINCT l.name LoginName, l.type_desc, l.is_disabled, 
+      ISNULL(u.stat + ', but is user in ' + u.db  +' DB', 'no_db_users') db_perms, 
+      CASE WHEN p.major_id IS NULL AND r.role_principal_id IS NULL  
+      THEN 'no_srv_permissions' ELSE 'na' END srv_perms 
+     FROM sys.server_principals l LEFT JOIN sys.server_permissions p 
+       ON l.principal_id = p.grantee_principal_id  
+       AND p.permission_name <> 'CONNECT SQL'
+      LEFT JOIN sys.server_role_members r 
+       ON l.principal_id = r.member_principal_id
+       LEFT JOIN #all_users u 
        ON l.sid= u.sid
-      WHERE  l.type\_desc <> 'SERVER\_ROLE' 
-       AND ((u.db  IS NULL  AND p.major\_id IS NULL 
-         AND r.role\_principal\_id IS NULL )
-       OR (u.stat = 'no\_db\_permissions' AND p.major\_id IS NULL 
-         AND r.role\_principal\_id IS NULL)) 
+      WHERE  l.type_desc <> 'SERVER_ROLE' 
+       AND ((u.db  IS NULL  AND p.major_id IS NULL 
+         AND r.role_principal_id IS NULL )
+       OR (u.stat = 'no_db_permissions' AND p.major_id IS NULL 
+         AND r.role_principal_id IS NULL)) 
      ORDER BY 1, 4
     END
-    DROP TABLE #all\_users 
+    DROP TABLE #all_users 
 
 The list returned by this query contains logins that should be reviewed and most likely have to be disabled or deleted:
 
@@ -326,62 +326,62 @@ The last login in the list above still has user account in master database, but 
 
 These users are known as orphaned users because the associated link between the login and user is broken. Refer this [tip](/sqlservertip/1590/understanding-and-dealing-with-orphaned-users-in-a-sql-server-database/) for more information and how to fix these.
 
-    EXEC master.sys.sp\_msforeachdb '
+    EXEC master.sys.sp_msforeachdb '
     print ''?''
-    EXEC \[?\].dbo.sp\_change\_users\_login ''report'''
+    EXEC \[?\].dbo.sp_change_users_login ''report'''
 
 ### Find orphaned users in all of the databases (no logins exist for the database users)
 
 Make sure you ran the previous check and fixed SQL Server logins before running this check.
 
     SET NOCOUNT ON
-    CREATE TABLE #orph\_users (db SYSNAME, username SYSNAME, 
-        type\_desc VARCHAR(30),type VARCHAR(30))
-    EXEC master.sys.sp\_msforeachdb  
-    'INSERT INTO #orph\_users
-     SELECT ''?'', u.name , u.type\_desc, u.type
-     FROM  \[?\].sys.database\_principals u 
-      LEFT JOIN  \[?\].sys.server\_principals l ON u.sid = l.sid 
+    CREATE TABLE #orph_users (db SYSNAME, username SYSNAME, 
+        type_desc VARCHAR(30),type VARCHAR(30))
+    EXEC master.sys.sp_msforeachdb  
+    'INSERT INTO #orph_users
+     SELECT ''?'', u.name , u.type_desc, u.type
+     FROM  \[?\].sys.database_principals u 
+      LEFT JOIN  \[?\].sys.server_principals l ON u.sid = l.sid 
      WHERE l.sid IS NULL 
       AND u.type NOT IN (''A'', ''R'', ''C'') -- not a db./app. role or certificate
-      AND u.principal\_id > 4 -- not dbo, guest or INFORMATION\_SCHEMA
+      AND u.principal_id > 4 -- not dbo, guest or INFORMATION_SCHEMA
       AND u.name NOT LIKE ''%DataCollector%'' 
       AND u.name NOT LIKE ''mdw%'' -- not internal users in msdb or MDW databases'
         
-     SELECT \* FROM #orph\_users
+     SELECT \* FROM #orph_users
      
-     DROP TABLE #orph\_users
+     DROP TABLE #orph_users
 
 ### Validate logins (identify orphaned Windows logins)
 
 This check will show Windows logins that have been deleted from the server or Active Directory. Read more about this stored procedure in this [tip](/sqlservertip/1864/identify-orphaned-windows-logins-and-groups-in-sql-server-with-spvalidatelogins/).
 
-    EXEC master.sys.sp\_validatelogins
+    EXEC master.sys.sp_validatelogins
 
 ### Backups verification report
 
 Check if a Full backup exists that is not older than 7 days, a Differential backup exists that is not older than 2 days or a Transaction Log backup exists that is not older than 1 day (you can change the number of days based on your requirements):
 
     SELECT m.name AS DatabaseName, DATABASEPROPERTYEX(m.name, 'Recovery') AS RecoveryMode,
-     CASE WHEN ISNULL(MAX(b.backup\_finish\_date), GETDATE()-10000) < GETDATE()-7 
+     CASE WHEN ISNULL(MAX(b.backup_finish_date), GETDATE()-10000) < GETDATE()-7 
         AND b.\[type\] = 'D' THEN 'Problem!' 
-       WHEN ISNULL(MAX(b.backup\_finish\_date), GETDATE()-10000) < GETDATE()-2 
+       WHEN ISNULL(MAX(b.backup_finish_date), GETDATE()-10000) < GETDATE()-2 
          AND b.\[type\] = 'I' THEN 'Problem!' 
-       WHEN ISNULL(MAX(b.backup\_finish\_date), GETDATE()-10000) < GETDATE()-1 
+       WHEN ISNULL(MAX(b.backup_finish_date), GETDATE()-10000) < GETDATE()-1 
          AND b.\[type\] = 'L' THEN 'Problem!' 
        ELSE 'OK' END AS BackupStatus,
         CASE WHEN b.\[type\] = 'D'  THEN 'Full' 
        WHEN b.\[type\] = 'I'  THEN 'Differential'
        WHEN b.\[type\] = 'L'  THEN 'Transaction Log'  END AS BackupType, 
-     MAX(b.backup\_finish\_date) AS backup\_finish\_date
+     MAX(b.backup_finish_date) AS backup_finish_date
       FROM master.sys.databases m LEFT JOIN msdb.dbo.backupset b
-      ON m.name = b.database\_name 
-    WHERE m.database\_id NOT IN (2,3) 
-      AND DATABASEPROPERTYEX(m.name, 'Updateability') <> 'READ\_ONLY'
+      ON m.name = b.database_name 
+    WHERE m.database_id NOT IN (2,3) 
+      AND DATABASEPROPERTYEX(m.name, 'Updateability') <> 'READ_ONLY'
     GROUP BY m.name, b.\[type\] 
-    HAVING ISNULL(MAX(b.backup\_finish\_date), GETDATE()-11) > GETDATE() - 10 
-      OR MAX(b.backup\_finish\_date) IS NULL
-    ORDER BY m.name, backup\_finish\_date 
+    HAVING ISNULL(MAX(b.backup_finish_date), GETDATE()-11) > GETDATE() - 10 
+      OR MAX(b.backup_finish_date) IS NULL
+    ORDER BY m.name, backup_finish_date 
 
 You can also use the SSMS built-in report to review a database's backup and restore events:
 
