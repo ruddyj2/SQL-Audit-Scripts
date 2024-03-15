@@ -8,15 +8,15 @@ The scripts listed below will help you configure several of the security options
 
 This will check to see what your current login audit level is set to capture.
 
-DECLARE @AuditLevel int
-EXEC master.dbo.xp\_instance\_regread N'HKEY\_LOCAL\_MACHINE', 
-   N'Software\\Microsoft\\MSSQLServer\\MSSQLServer', 
-   N'AuditLevel', @AuditLevel OUTPUT
-SELECT CASE WHEN @AuditLevel = 0 THEN 'None'
-   WHEN @AuditLevel = 1 THEN 'Successful logins only'
-   WHEN @AuditLevel = 2 THEN 'Failed logins only'
-   WHEN @AuditLevel = 3 THEN 'Both failed and successful logins' 
-   END AS \[AuditLevel\] 
+   DECLARE @AuditLevel int
+   EXEC master.dbo.xp\_instance\_regread N'HKEY\_LOCAL\_MACHINE', 
+      N'Software\\Microsoft\\MSSQLServer\\MSSQLServer', 
+      N'AuditLevel', @AuditLevel OUTPUT
+   SELECT CASE WHEN @AuditLevel = 0 THEN 'None'
+      WHEN @AuditLevel = 1 THEN 'Successful logins only'
+      WHEN @AuditLevel = 2 THEN 'Failed logins only'
+      WHEN @AuditLevel = 3 THEN 'Both failed and successful logins' 
+      END AS \[AuditLevel\] 
 
 ### Configure number of SQL Server logs
 
